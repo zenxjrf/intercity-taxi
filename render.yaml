@@ -1,6 +1,6 @@
 services:
   # PostgreSQL Database
-  - type: postgres
+  - type: postgresql
     name: intercity-taxi-db
     plan: free
     ipAllowList: []  # Allow all (or specify your IPs)
