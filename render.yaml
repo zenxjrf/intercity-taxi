@@ -1,16 +1,4 @@
 services:
-  # PostgreSQL Database
-  - type: postgresql
-    name: intercity-taxi-db
-    plan: free
-    ipAllowList: []  # Allow all (or specify your IPs)
-
-  # Redis for caching
-  - type: redis
-    name: intercity-taxi-redis
-    plan: free
-    ipAllowList: []
-
   # Backend API Service
   - type: web
     name: intercity-taxi-backend
@@ -38,33 +26,19 @@ services:
       - key: ADMIN_TELEGRAM_ID
         sync: false  # Set manually
       - key: DB_HOST
-        fromDatabase:
-          name: intercity-taxi-db
-          property: host
+        sync: false  # Set manually after creating PostgreSQL
       - key: DB_PORT
-        fromDatabase:
-          name: intercity-taxi-db
-          property: port
+        value: 5432
       - key: DB_NAME
-        fromDatabase:
-          name: intercity-taxi-db
-          property: database
+        sync: false  # Set manually after creating PostgreSQL
       - key: DB_USER
-        fromDatabase:
-          name: intercity-taxi-db
-          property: user
+        sync: false  # Set manually after creating PostgreSQL
       - key: DB_PASSWORD
-        fromDatabase:
-          name: intercity-taxi-db
-          property: password
+        sync: false  # Set manually after creating PostgreSQL
       - key: REDIS_HOST
-        fromRedis:
-          name: intercity-taxi-redis
-          property: host
+        sync: false  # Optional - set if using Redis
       - key: REDIS_PORT
-        fromRedis:
-          name: intercity-taxi-redis
-          property: port
+        value: 6379
       - key: DRIVER_OFFLINE_TIMEOUT_HOURS
         value: 12
       - key: ORDER_ALERT_TIMEOUT_HOURS
