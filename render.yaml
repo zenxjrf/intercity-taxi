@@ -1,0 +1,90 @@
+services:
+  # PostgreSQL Database
+  - type: psql
+    name: intercity-taxi-db
+    plan: free
+    ipAllowList: []  # Allow all (or specify your IPs)
+
+  # Redis for caching
+  - type: redis
+    name: intercity-taxi-redis
+    plan: free
+    ipAllowList: []
+
+  # Backend API Service
+  - type: web
+    name: intercity-taxi-backend
+    plan: free
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: BOT_TOKEN
+        sync: false  # Set manually in Render dashboard
+      - key: WEBHOOK_URL
+        fromService:
+          name: intercity-taxi-backend
+          type: web
+          property: url
+      - key: WEB_APP_URL
+        fromService:
+          name: intercity-taxi-frontend
+          type: static
+          property: url
+      - key: ADMIN_TELEGRAM_ID
+        sync: false  # Set manually
+      - key: DB_HOST
+        fromDatabase:
+          name: intercity-taxi-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: intercity-taxi-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: intercity-taxi-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: intercity-taxi-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: intercity-taxi-db
+          property: password
+      - key: REDIS_HOST
+        fromRedis:
+          name: intercity-taxi-redis
+          property: host
+      - key: REDIS_PORT
+        fromRedis:
+          name: intercity-taxi-redis
+          property: port
+      - key: DRIVER_OFFLINE_TIMEOUT_HOURS
+        value: 12
+      - key: ORDER_ALERT_TIMEOUT_HOURS
+        value: 2
+      - key: MAX_BROADCAST_PER_SECOND
+        value: 25
+    healthCheckPath: /health
+
+  # Frontend Static Site
+  - type: static
+    name: intercity-taxi-frontend
+    plan: free
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    buildCommand: ""  # Build happens in Dockerfile
+    staticPublishPath: /usr/share/nginx/html
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: intercity-taxi-backend
+          type: web
+          property: url
